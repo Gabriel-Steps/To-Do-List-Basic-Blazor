@@ -72,7 +72,7 @@ ToDoListBlazor/
 │── Context/
 │   ├── ListaDeTarefasContext.cs
 │── Migrations/
-│   ├── 20250304172549_ToDoListMig.cs
+│   ├── 20250304172549_ToDoListMigration.cs
 │   ├── ListaDeTarefasContextModelSnapshot.cs
 │── Models/
 │   ├── Tarefa.cs
