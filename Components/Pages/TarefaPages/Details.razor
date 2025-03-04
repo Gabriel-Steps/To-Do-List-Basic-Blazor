@@ -1,0 +1,48 @@
+﻿@page "/tarefas/details"
+@using Microsoft.EntityFrameworkCore
+@using ToDoListBlazor.Models
+@inject IDbContextFactory<ToDoListBlazor.Context.ListaDeTarefasContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Details</PageTitle>
+
+<h1>Details</h1>
+
+<div>
+    <h2>Tarefa</h2>
+    <hr />
+    @if (tarefa is null)
+    {
+        <p><em>Loading...</em></p>
+    }
+    else {
+        <dl class="row">
+            <dt class="col-sm-2">Titulo</dt>
+            <dd class="col-sm-10">@tarefa.Titulo</dd>
+            <dt class="col-sm-2">Descricao</dt>
+            <dd class="col-sm-10">@tarefa.Descricao</dd>
+        </dl>
+        <div>
+            <a href="@($"/tarefas/edit?id={tarefa.Id}")">Edit</a> |
+            <a href="@($"/tarefas")">Back to List</a>
+        </div>
+    }
+</div>
+
+@code {
+    private Tarefa? tarefa;
+
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        tarefa = await context.Tarefas.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (tarefa is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+}

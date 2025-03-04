@@ -1,0 +1,94 @@
+﻿@page "/tarefas/edit"
+@using Microsoft.EntityFrameworkCore
+@using ToDoListBlazor.Models
+@inject IDbContextFactory<ToDoListBlazor.Context.ListaDeTarefasContext> DbFactory
+@inject NavigationManager NavigationManager
+
+<PageTitle>Edit</PageTitle>
+
+<h1>Edit</h1>
+
+<h2>Tarefa</h2>
+<hr />
+@if (Tarefa is null)
+{
+    <p><em>Loading...</em></p>
+}
+else
+{
+    <div class="row">
+        <div class="col-md-4">
+            <EditForm method="post" Model="Tarefa" OnValidSubmit="UpdateTarefa" FormName="edit" Enhance>
+                <DataAnnotationsValidator />
+                <ValidationSummary role="alert"/>
+                <input type="hidden" name="Tarefa.Id" value="@Tarefa.Id" />
+                <div class="mb-3">
+                    <label for="titulo" class="form-label">Titulo:</label>
+                    <InputText id="titulo" @bind-Value="Tarefa.Titulo" class="form-control" />
+                    <ValidationMessage For="() => Tarefa.Titulo" class="text-danger" />
+                </div>
+                <div class="mb-3">
+                    <label for="descricao" class="form-label">Descricao:</label>
+                    <InputText id="descricao" @bind-Value="Tarefa.Descricao" class="form-control" />
+                    <ValidationMessage For="() => Tarefa.Descricao" class="text-danger" />
+                </div>
+                <button type="submit" class="btn btn-primary">Save</button>
+            </EditForm>
+        </div>
+    </div>
+}
+
+<div>
+    <a href="/tarefas">Back to List</a>
+</div>
+
+@code {
+    [SupplyParameterFromQuery]
+    private int Id { get; set; }
+
+    [SupplyParameterFromForm]
+    private Tarefa? Tarefa { get; set; }
+
+    protected override async Task OnInitializedAsync()
+    {
+        using var context = DbFactory.CreateDbContext();
+        Tarefa ??= await context.Tarefas.FirstOrDefaultAsync(m => m.Id == Id);
+
+        if (Tarefa is null)
+        {
+            NavigationManager.NavigateTo("notfound");
+        }
+    }
+
+    // To protect from overposting attacks, enable the specific properties you want to bind to.
+    // For more information, see https://learn.microsoft.com/aspnet/core/blazor/forms/#mitigate-overposting-attacks.
+    private async Task UpdateTarefa()
+    {
+        using var context = DbFactory.CreateDbContext();
+        context.Attach(Tarefa!).State = EntityState.Modified;
+
+        try
+        {
+            await context.SaveChangesAsync();
+        }
+        catch (DbUpdateConcurrencyException)
+        {
+            if (!TarefaExists(Tarefa!.Id))
+            {
+                NavigationManager.NavigateTo("notfound");
+            }
+            else
+            {
+                throw;
+            }
+        }
+
+        NavigationManager.NavigateTo("/tarefas");
+    }
+
+    private bool TarefaExists(int id)
+    {
+        using var context = DbFactory.CreateDbContext();
+        return context.Tarefas.Any(e => e.Id == id);
+    }
+}

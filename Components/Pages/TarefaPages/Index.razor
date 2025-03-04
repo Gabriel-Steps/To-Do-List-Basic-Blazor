@@ -1,0 +1,37 @@
+﻿@page "/tarefas"
+@using Microsoft.EntityFrameworkCore
+@using Microsoft.AspNetCore.Components.QuickGrid
+@using ToDoListBlazor.Models
+@using ToDoListBlazor.Context
+@implements IAsyncDisposable
+@inject IDbContextFactory<ToDoListBlazor.Context.ListaDeTarefasContext> DbFactory
+
+<PageTitle>Index</PageTitle>
+
+<h1>Index</h1>
+
+<p>
+    <a href="tarefas/create">Create New</a>
+</p>
+
+<QuickGrid Class="table" Items="context.Tarefas">
+    <PropertyColumn Property="tarefa => tarefa.Titulo" />
+    <PropertyColumn Property="tarefa => tarefa.Descricao" />
+
+    <TemplateColumn Context="tarefa">
+        <a href="@($"tarefas/edit?id={tarefa.Id}")">Edit</a> |
+        <a href="@($"tarefas/details?id={tarefa.Id}")">Details</a> |
+        <a href="@($"tarefas/delete?id={tarefa.Id}")">Delete</a>
+    </TemplateColumn>
+</QuickGrid>
+
+@code {
+    private ListaDeTarefasContext context = default!;
+
+    protected override void OnInitialized()
+    {
+        context = DbFactory.CreateDbContext();
+    }
+
+    public async ValueTask DisposeAsync() => await context.DisposeAsync();
+}
